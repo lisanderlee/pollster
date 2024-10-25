@@ -1,101 +1,169 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useEffect } from "react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { PlusCircle, Trash2 } from "lucide-react"
+import Image from "next/image"
+
+type Campaign = {
+  id: number
+  name: string
+  description: string
+  image: string
+}
+
+export default function CampaignList() {
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [newCampaign, setNewCampaign] = useState({ name: "", description: "", image: "" })
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  useEffect(() => {
+    fetchCampaigns()
+  }, [])
+
+  const fetchCampaigns = async () => {
+    try {
+      const response = await fetch('/api/campaigns')
+      if (!response.ok) {
+        throw new Error('Failed to fetch campaigns')
+      }
+      const data = await response.json()
+      setCampaigns(data)
+    } catch (error) {
+      console.error('Error fetching campaigns:', error)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setNewCampaign(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleAddCampaign = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCampaign),
+      })
+      if (!response.ok) {
+        throw new Error('Failed to add campaign')
+      }
+      await fetchCampaigns()
+      setNewCampaign({ name: "", description: "", image: "" })
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error('Error adding campaign:', error)
+    }
+  }
+
+  const handleDeleteCampaign = async (id: number) => {
+    try {
+      const response = await fetch('/api/campaigns', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      })
+      if (!response.ok) {
+        throw new Error('Failed to delete campaign')
+      }
+      await fetchCampaigns()
+    } catch (error) {
+      console.error('Error deleting campaign:', error)
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Campaigns</h1>
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <Input type="search" placeholder="Search campaigns..." className="flex-grow max-w-md" />
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto">
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Campaign
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Campaign</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddCampaign} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Campaign Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={newCampaign.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  name="description"
+                  value={newCampaign.description}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="image">Image URL</Label>
+                <Input
+                  id="image"
+                  name="image"
+                  value={newCampaign.image}
+                  onChange={handleInputChange}
+                  placeholder="/placeholder.svg?height=100&width=100"
+                  required
+                />
+              </div>
+              <Button type="submit">Add Campaign</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {campaigns.map((campaign) => (
+          <Card key={campaign.id} className="flex flex-col relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8"
+              onClick={() => handleDeleteCampaign(campaign.id)}
+              aria-label={`Delete ${campaign.name}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <CardHeader className="flex-grow">
+              <div className="flex items-center space-x-4">
+                <Image
+                  src={campaign.image}
+                  alt={`${campaign.name} image`}
+                  width={50}
+                  height={50}
+                  className="rounded-full"
+                />
+                <CardTitle>{campaign.name}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>{campaign.description}</CardDescription>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
-  );
+  )
 }
