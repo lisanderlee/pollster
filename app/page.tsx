@@ -27,16 +27,17 @@ export default function CampaignList() {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await fetch('/api/campaigns')
+      const response = await fetch('/api/campaigns', { cache: 'no-store' });
       if (!response.ok) {
-        throw new Error('Failed to fetch campaigns')
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json()
-      setCampaigns(data)
+      const data = await response.json();
+      setCampaigns(data);
     } catch (error) {
-      console.error('Error fetching campaigns:', error)
+      console.error('Error fetching campaigns:', error);
+      // Handle the error appropriately, e.g., set an error state
     }
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

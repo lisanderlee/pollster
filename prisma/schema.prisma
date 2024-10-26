@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url="postgres://default:ED0TPxnp7kjG@ep-polished-night-a6y19vvx-pooler.us-west-2.aws.neon.tech/verceldb?pgbouncer=true&connect_timeout=15&sslmode=require"
+ 
 }
 
 model Campaign {
